@@ -43,4 +43,5 @@ steps:
   inputs:
     command: 'build'
     arguments: '--no-restore --configuration Release'
-    projects: '**/*.csproj'
+    projects: '**/*.csproj'    command: 'install'
+    command: 'install'
