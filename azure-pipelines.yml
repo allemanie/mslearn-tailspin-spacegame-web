@@ -1,18 +1,15 @@
 trigger:
   - '*'
   
-  
   pool:
     vmImage: 'ubuntu-16.04'
     demands:
       - npm
   
-  
   variables:
     buildConfiguration: 'Release'
     wwwrootDir: 'Tailspin.SpaceGame.Web/wwwroot'
     dotnetSdkVersion: '3.1.100'
-  
   
   steps:
   - task: UseDotNet@2
@@ -20,38 +17,31 @@ trigger:
     inputs:
       version: '$(dotnetSdkVersion)'
   
-  
   - task: UseDotNet@2
     displayName: 'Use .NET Core SDK 2.1.505 for SonarCloud'
     inputs:
       version: '2.1.505'
-  
   
   - task: Npm@1
     displayName: 'Run npm install'
     inputs:
       verbose: false
   
-  
   - script: './node_modules/.bin/node-sass $(wwwrootDir) --output $(wwwrootDir)'
     displayName: 'Compile Sass assets'
-  
   
   - task: gulp@1
     displayName: 'Run gulp tasks'
   
-  
   - script: 'echo "$(Build.DefinitionName), $(Build.BuildId), $(Build.BuildNumber)" > buildinfo.txt'
     displayName: 'Write build info'
     workingDirectory: $(wwwrootDir)
-  
   
   - task: DotNetCoreCLI@2
     displayName: 'Restore project dependencies'
     inputs:
       command: 'restore'
       projects: '**/*.csproj'
-  
   
   - task: SonarCloudPrepare@1
     displayName: 'Prepare SonarCloud analysis'
@@ -80,14 +70,12 @@ trigger:
       arguments: '--no-restore --configuration $(buildConfiguration)'
       projects: '**/*.csproj'
   
-  
   - task: DotNetCoreCLI@2
     displayName: 'Install ReportGenerator'
     inputs:
       command: custom
       custom: tool
       arguments: 'install --global dotnet-reportgenerator-globaltool'
-  
   
   - task: DotNetCoreCLI@2
     displayName: 'Run unit tests - $(buildConfiguration)'
@@ -97,11 +85,9 @@ trigger:
       publishTestResults: true
       projects: '**/*.Tests.csproj'
   
-  
   - script: |
       reportgenerator -reports:$(Build.SourcesDirectory)/**/coverage.cobertura.xml -targetdir:$(Build.SourcesDirectory)/CodeCoverage -reporttypes:HtmlInline_AzurePipelines
     displayName: 'Create code coverage report'
-  
   
   - task: SonarCloudAnalyze@1
     displayName: 'Run SonarCloud code analysis'
@@ -129,7 +115,6 @@ trigger:
       codeCoverageTool: 'cobertura'
       summaryFileLocation: '$(Build.SourcesDirectory)/**/coverage.cobertura.xml'
   
-  
   - task: DotNetCoreCLI@2
     displayName: 'Publish the project - $(buildConfiguration)'
     inputs:
@@ -138,7 +123,6 @@ trigger:
       publishWebProjects: false
       arguments: '--no-build --configuration $(buildConfiguration) --output $(Build.ArtifactStagingDirectory)/$(buildConfiguration)'
       zipAfterPublish: true
-  
   
   - task: PublishBuildArtifacts@1
     displayName: 'Publish Artifact: drop'
